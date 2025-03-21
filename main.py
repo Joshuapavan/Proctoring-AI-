@@ -2,7 +2,7 @@ from fastapi import FastAPI, WebSocket, HTTPException, Request, Depends
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from schemas.responses import ErrorResponse
-from routers import auth
+from routers import auth, exam  # Add exam router import
 import cv2
 import numpy as np
 from datetime import datetime
@@ -37,6 +37,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["authentication"])
+app.include_router(exam.router, prefix="/api/v1/exam", tags=["exam"])  # Add exam router
 
 # Add exception handlers
 @app.exception_handler(404)

@@ -146,7 +146,7 @@ async def login_password(
     return Token(
         access_token=access_token, 
         token_type="bearer",
-        user_id=user.id
+        id=user.id  # Changed from user_id to id
     )
 
 @router.post("/login/face", response_model=Token)
@@ -173,7 +173,7 @@ async def login_face(
                 return Token(
                     access_token=access_token,
                     token_type="bearer",
-                    user_id=user.id
+                    id=user.id  # Changed from user_id to id
                 )
             elif isinstance(result, str):
                 # If result is an error message
