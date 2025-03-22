@@ -3,11 +3,13 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from utils.logger import logger
 from config.settings import settings
+import os
 
-SQLALCHEMY_DATABASE_URL = f"mysql+mysqlconnector://{settings.DB_USER}:{settings.DB_PASSWORD}@{settings.DB_HOST}/{settings.DB_NAME}"
+# Use Railway's MYSQL_URL if available, fallback to constructed URL
+DATABASE_URL = os.getenv("MYSQL_URL", f"mysql+mysqlconnector://{settings.DB_USER}:{settings.DB_PASSWORD}@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}")
 
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
+    DATABASE_URL,
     pool_size=20,
     max_overflow=10,
     pool_pre_ping=True,
