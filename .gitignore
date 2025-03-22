@@ -3,6 +3,16 @@ myenv/
 .venv/
 .env
 .env.*
+!.env.example
+.env.local
+.env.*.local
+.env.development
+.env.test
+.env.production
+*.env
+config.json
+secrets.json
+credentials.json
 logs/
 *.log
 *.pyc
