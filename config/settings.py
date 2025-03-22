@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings
+from pydantic import Field  # Add this import
 from functools import lru_cache
 import os
 from dotenv import load_dotenv
