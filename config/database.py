@@ -2,8 +2,11 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from utils.logger import logger
+<<<<<<< HEAD
 from config.settings import settings
 import os
+=======
+>>>>>>> 142fc08 (final commit)
 
 def get_database_url():
     """Get database URL with fallbacks"""
@@ -18,6 +21,7 @@ def get_database_url():
     # Fallback to constructed URL
     return f"mysql+mysqlconnector://{settings.DB_USER}:{settings.DB_PASSWORD}@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}"
 
+<<<<<<< HEAD
 # Get Database URL
 DATABASE_URL = get_database_url()
 logger.info(f"Using database: {DATABASE_URL.split('@')[1]}")  # Log without credentials
@@ -36,6 +40,14 @@ engine = create_engine(
     pool_pre_ping=True,
     pool_recycle=3600,
     connect_args=ssl_args
+=======
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL,
+    pool_size=20,
+    max_overflow=10,
+    pool_pre_ping=True,
+    pool_recycle=3600
+>>>>>>> 142fc08 (final commit)
 )
 
 SessionLocal = sessionmaker(
