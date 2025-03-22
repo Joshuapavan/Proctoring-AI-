@@ -19,7 +19,5 @@ ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/app
 ENV PORT=8000
 
-# Use a shell script to start the application
-COPY start.sh .
-RUN chmod +x start.sh
-CMD ["./start.sh"]
+# Run the application
+CMD sh -c 'uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}'
