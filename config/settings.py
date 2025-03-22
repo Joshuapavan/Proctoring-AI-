@@ -7,10 +7,11 @@ load_dotenv()
 
 class Settings(BaseSettings):
     # Database settings
-    DB_USER: str = os.getenv("DB_USER", "root")
-    DB_PASSWORD: str = os.getenv("DB_PASSWORD", "")
-    DB_HOST: str = os.getenv("DB_HOST", "localhost")
-    DB_NAME: str = os.getenv("DB_NAME", "Proctoring_AI")
+    DB_USER: str = os.getenv("MYSQLUSER", "root")
+    DB_PASSWORD: str = os.getenv("MYSQL_ROOT_PASSWORD", "")
+    DB_HOST: str = os.getenv("MYSQLHOST", "localhost") 
+    DB_NAME: str = os.getenv("MYSQL_DATABASE", "Proctoring_AI")
+    DB_PORT: int = int(os.getenv("MYSQLPORT", "3306"))
 
     # JWT settings
     JWT_SECRET_KEY: str = os.getenv("JWT_SECRET_KEY")
