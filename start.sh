@@ -1,7 +1,8 @@
-#!/bin/bash
+#!/bin/sh
+# Export default JWT secret if not set
+if [ -z "$JWT_SECRET_KEY" ]; then
+    export JWT_SECRET_KEY=$(python -c 'import secrets; print(secrets.token_hex(64))')
+fi
 
-# Get port from environment variable or use default
-PORT="${PORT:-8000}"
-
-# Start the application
-exec python -c "import os; from uvicorn import run; port = int(os.getenv('PORT', '8000')); run('main:app', host='0.0.0.0', port=port)"
+# Start the application using uvicorn
+exec uvicorn main:app --host 0.0.0.0 --port ${PORT:-8080} --workers 1
