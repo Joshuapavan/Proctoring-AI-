@@ -2,8 +2,9 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from utils.logger import logger
+from config.settings import settings
 
-SQLALCHEMY_DATABASE_URL = "mysql+mysqlconnector://root:1234567890@localhost/Proctoring_AI"
+SQLALCHEMY_DATABASE_URL = f"mysql+mysqlconnector://{settings.DB_USER}:{settings.DB_PASSWORD}@{settings.DB_HOST}/{settings.DB_NAME}"
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL,

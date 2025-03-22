@@ -12,6 +12,7 @@ from pydantic import BaseModel, EmailStr
 import imghdr
 import face_recognition
 from schemas.auth import UserResponse, Token
+from config.settings import settings
 
 router = APIRouter()
 
@@ -19,9 +20,9 @@ router = APIRouter()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # JWT settings
-SECRET_KEY = "018f3fefcbec0e190492e48855d8e301699953689567d1323704a3fdf77382a530383845fb07dce529a5a7e44ba0194620455c7a3dcc3f52a9ce88dd1b355dbf9ad764d110131961b9419ac2fe9b2c3e2029d20fdc4f2b62a39b38132f8fa1bd2787b225ea5f20fc939bd763f9384bd79d00efffd3a41b3be936742c35d99c3fe40bdd998a46b5225948818b1b2eae891d46f8d9ca1d02afec657f9b5b68f7bbcb5ce24e5b50328abf66db0cccc083bc28cdd016e49f152d62803075e7ed94518efc8147ab33fbc58b2101322d1e65f3b79c6fec4b39bfdad3565684638bae390fd4626aafff6ab71167c77265a269b2f71bae44b407e219c3d0274e60a28b70"  # Change this in production
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+SECRET_KEY = settings.JWT_SECRET_KEY
+ALGORITHM = settings.JWT_ALGORITHM
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
