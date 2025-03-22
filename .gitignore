@@ -1,7 +1,7 @@
 __pycache__/
 myenv/
 .venv/
-.env
+!.env.example
 logs/
 *.log
 *.pyc
