@@ -61,15 +61,29 @@ app = FastAPI()
 # Initialize database and models on startup
 @app.on_event("startup")
 async def startup_event():
-    # Configure MediaPipe
-    configure_mediapipe()
-    
-    # Initialize database
-    init_db()
-    
-    # Initialize YOLO model
-    from detection.yolo_detection import load_model
-    load_model()
+    try:
+        # Configure MediaPipe first
+        configure_mediapipe()
+        logger.info("MediaPipe configured successfully")
+        
+        # Test database connection before init
+        from sqlalchemy import text
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+            logger.info("Database connection test successful")
+        
+        # Initialize database
+        init_db()
+        logger.info("Database initialized successfully")
+        
+        # Initialize YOLO model
+        from detection.yolo_detection import load_model
+        if load_model():
+            logger.info("YOLO model loaded successfully")
+        
+    except Exception as e:
+        logger.error(f"Startup failed: {str(e)}", exc_info=True)
+        raise
 
 # Add CORS middleware
 app.add_middleware(
