@@ -5,12 +5,22 @@ from utils.logger import logger
 from config.settings import settings
 import os
 
-# Use Railway's MYSQL_URL if available, fallback to constructed URL
-DATABASE_URL = os.getenv("MYSQL_URL", f"mysql+mysqlconnector://{settings.DB_USER}:{settings.DB_PASSWORD}@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}")
+def get_database_url():
+    """Get database URL with fallbacks"""
+    # First try Railway's URL
+    if "MYSQL_URL" in os.environ:
+        return os.environ["MYSQL_URL"].replace('mysql://', 'mysql+mysqlconnector://')
+    
+    # Fallback to constructed URL
+    return f"mysql+mysqlconnector://{settings.DB_USER}:{settings.DB_PASSWORD}@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}"
+
+# Get Database URL
+DATABASE_URL = get_database_url()
+logger.info(f"Using database: {DATABASE_URL.split('@')[1]}")  # Log without credentials
 
 engine = create_engine(
     DATABASE_URL,
-    pool_size=20,
+    pool_size=5,  # Reduced from 20
     max_overflow=10,
     pool_pre_ping=True,
     pool_recycle=3600
