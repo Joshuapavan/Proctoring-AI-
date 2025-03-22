@@ -16,7 +16,7 @@ from detection.face_detection import detect_face
 from detection.hand_detection import detect_hands
 from detection.face_mesh_detection import detect_face_mesh
 from detection.yolo_detection import detect_yolo
-from config.database import init_db, get_db
+from config.database import init_db, get_db, engine  # Add engine import
 from models.logs import Log
 from models.users import User
 from routers.auth import SECRET_KEY, ALGORITHM
@@ -67,10 +67,13 @@ async def startup_event():
         logger.info("MediaPipe configured successfully")
         
         # Test database connection before init
-        from sqlalchemy import text
-        with engine.connect() as conn:
-            conn.execute(text("SELECT 1"))
-            logger.info("Database connection test successful")
+        try:
+            with engine.connect() as conn:
+                result = conn.execute(text("SELECT 1"))
+                logger.info("Database connection test successful")
+        except Exception as e:
+            logger.error(f"Database connection failed: {str(e)}")
+            raise
         
         # Initialize database
         init_db()
@@ -80,6 +83,8 @@ async def startup_event():
         from detection.yolo_detection import load_model
         if load_model():
             logger.info("YOLO model loaded successfully")
+        else:
+            logger.warning("YOLO model initialization failed")
         
     except Exception as e:
         logger.error(f"Startup failed: {str(e)}", exc_info=True)
