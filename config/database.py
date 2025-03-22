@@ -9,7 +9,11 @@ def get_database_url():
     """Get database URL with fallbacks"""
     # First try Railway's URL
     if "MYSQL_URL" in os.environ:
-        return os.environ["MYSQL_URL"].replace('mysql://', 'mysql+mysqlconnector://')
+        url = os.environ["MYSQL_URL"]
+        # Remove ssl-mode from URL and handle it in create_engine
+        if "ssl-mode" in url:
+            url = url.split("?")[0]
+        return url.replace('mysql://', 'mysql+mysqlconnector://')
     
     # Fallback to constructed URL
     return f"mysql+mysqlconnector://{settings.DB_USER}:{settings.DB_PASSWORD}@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}"
@@ -18,12 +22,20 @@ def get_database_url():
 DATABASE_URL = get_database_url()
 logger.info(f"Using database: {DATABASE_URL.split('@')[1]}")  # Log without credentials
 
+# Configure SSL settings
+ssl_args = {
+    "ssl": {
+        "ssl_verify_cert": True,
+    }
+}
+
 engine = create_engine(
     DATABASE_URL,
     pool_size=5,  # Reduced from 20
     max_overflow=10,
     pool_pre_ping=True,
-    pool_recycle=3600
+    pool_recycle=3600,
+    connect_args=ssl_args
 )
 
 SessionLocal = sessionmaker(
