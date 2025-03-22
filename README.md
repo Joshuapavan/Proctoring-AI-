@@ -1,95 +1,131 @@
-# Real-Time Detection System
+# Proctoring AI System
 
-This project is a real-time detection system that uses various computer vision models to detect faces, hands, face mesh landmarks, and objects (like cell phones and people) in video frames received from a WebSocket connection. The detections are logged with timestamps and sent back to the frontend in real-time.
+A real-time AI proctoring system that monitors exam sessions using computer vision. The system detects suspicious activities and provides exam analytics through a secure WebSocket connection.
 
 ## Features
 
-- Face Detection using MediaPipe
-- Hand Detection using MediaPipe
-- Face Mesh Detection using MediaPipe
-- Object Detection (e.g., cell phones, people) using YOLOv5
+- **Real-time Detection**
+  - Face presence/absence detection
+  - Eye and mouth movement tracking
+  - Hand gesture detection
+  - Phone and multiple person detection
+
+- **Authentication & Security**
+  - JWT-based authentication
+  - Face recognition login
+  - Secure WebSocket connections
+  - Session management
+
+- **Exam Management**
+  - Start/Stop exam sessions
+  - Real-time activity logging
+  - Session analytics
+  - Compliance scoring
+
+## Technical Stack
+
+- **Backend Framework**: FastAPI
+- **Database**: MySQL
+- **ML/CV Libraries**:
+  - MediaPipe (Face, Hand, Mesh detection)
+  - YOLOv8 (Object detection)
+  - OpenCV
+  - face_recognition
+
+## API Endpoints
+
+### Authentication
+- `POST /api/v1/auth/signup` - Register new user with face image
+- `POST /api/v1/auth/login/password` - Login with email/password
+- `POST /api/v1/auth/login/face` - Login with face recognition
+
+### Exam Management
+- `POST /api/v1/exam/start/{user_id}` - Start exam session
+- `POST /api/v1/exam/stop/{user_id}` - Stop exam session
+- `POST /api/v1/exam/pause/{user_id}` - Pause exam session
+- `POST /api/v1/exam/resume/{user_id}` - Resume exam session
+- `GET /api/v1/exam/summary/{user_id}` - Get exam analytics
+- `POST /api/v1/exam/clear-logs/{user_id}` - Clear session logs
+
+### WebSocket
+- `ws://localhost:8080/ws/{user_id}` - Real-time proctoring connection
 
 ## Setup
 
-### Prerequisites
-
-- Python 3.7 or higher
-- pip (Python package installer)
-
-### Installation
-
 1. Clone the repository:
-
-   ```sh
-   git clone https://github.com/Sharath-kumar04/Proctoring-AI-BE.git
-   ```
-
-2. Install the required packages:
-
-   ```sh
-   pip install -r requirements.txt
-   ```
-
-### Running the Project
-
-1. Start the FastAPI server:
-
-   ```sh
-   uvicorn main:app --host localhost --port 8080 --reload
-   ```
-
-2. The server will be running at `http://localhost:8080`.
-
-### WebSocket Endpoint
-
-- The WebSocket endpoint is available at `/ws`.
-- The server receives video frames from the frontend, processes them using different detection functions, and sends back the detection logs.
-
-## How It Works
-
-1. **WebSocket Connection**:
-   - The frontend establishes a WebSocket connection with the server at the `/ws` endpoint.
-   - The server accepts the connection and enters a loop to continuously receive video frames.
-
-2. **Frame Processing**:
-   - Each received frame is decoded from bytes to an image format using OpenCV.
-   - The frame is then passed to various detection functions (`detect_face`, `detect_hands`, `detect_face_mesh`, `detect_yolo`).
-
-3. **Detection Functions**:
-   - Each detection function processes the frame and logs any detected events with the current system timestamp.
-   - For example, `detect_face` logs face detections, `detect_hands` logs hand detections, and so on.
-
-4. **Sending Logs**:
-   - The collected logs from all detection functions are sent back to the frontend in real-time via the WebSocket connection.
-   - The logs are formatted as JSON and include the timestamp and event details.
-
-## Project Structure
-
-.```
-├── detection
-│   ├── face_detection.py
-│   ├── face_mesh_detection.py
-│   ├── hand_detection.py
-│   ├── yolo_detection.py
-│   └── __init__.py
-├── main.py
-├── requirements.txt
-└── README.md
+```bash
+git clone https://github.com/yourusername/Proctoring-AI-BE.git
+cd Proctoring-AI-BE
 ```
 
-- `detection/face_detection.py`: Face detection using MediaPipe.
-- `detection/face_mesh_detection.py`: Face mesh detection using MediaPipe.
-- `detection/hand_detection.py`: Hand detection using MediaPipe.
-- `detection/yolo_detection.py`: Object detection using YOLOv5.
-- `main.py`: FastAPI server with WebSocket endpoint.
-- `requirements.txt`: List of required Python packages.
-- `README.md`: Project documentation.
+2. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
 
-## Notes
+3. Set up MySQL database:
+```sql
+CREATE DATABASE Proctoring_AI;
+```
 
-- The project is designed to use the GPU if available, otherwise it will fall back to using the CPU.
-- Ensure that your system has the necessary drivers and libraries installed for GPU support if you intend to use the GPU.
+4. Configure environment:
+```bash
+# Update database URL in config/database.py if needed
+SQLALCHEMY_DATABASE_URL = "mysql+mysqlconnector://user:password@localhost/Proctoring_AI"
+```
+
+5. Start the server:
+```bash
+uvicorn main:app --host localhost --port 8080 --reload
+```
+
+## API Documentation
+
+A complete Postman collection is available at:
+```bash
+/postman_collection/Proctoring AI - Sharath.postman_collection.json
+```
+
+Import this collection into Postman to test all available endpoints:
+1. Open Postman
+2. Click "Import"
+3. Select the collection JSON file
+4. All endpoints will be available with example requests
+
+The collection includes:
+- Authentication endpoints (signup, login)
+- Exam management endpoints
+- WebSocket testing examples
+- Environment variables
+
+## Architecture
+
+- `detection/` - ML model implementations
+- `models/` - Database models
+- `routers/` - API routes
+- `schemas/` - Pydantic models
+- `services/` - Business logic
+- `utils/` - Helper functions
+
+## WebSocket Protocol
+
+### Client -> Server:
+- Video frames as base64 or binary data
+
+### Server -> Client:
+```json
+{
+  "type": "logs",
+  "data": [
+    {
+      "event": "Face not detected",
+      "time": "2025-03-22T12:20:14.075"
+    }
+  ],
+  "stored": true
+}
+```
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+MIT License

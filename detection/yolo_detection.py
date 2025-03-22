@@ -2,31 +2,41 @@ import cv2
 import torch
 import os
 from datetime import datetime
+import logging
+from ultralytics import YOLO
+from utils.logger import logger
 
-# Get the current directory
-current_dir = os.path.dirname(os.path.abspath(__file__))
-model_path = os.path.join(os.path.dirname(current_dir), "yolov5s.pt")
+# Setup logging with more details
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
-# Initialize model variable
 model = None
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+MODEL_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "yolov8n.pt")
 
 def load_model():
     global model
     try:
-        if not os.path.exists(model_path):
-            # Download model if it doesn't exist
-            model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
-            torch.save(model.state_dict(), model_path)
+        logger.info("Loading YOLOv8 model...")
+        
+        if os.path.exists(MODEL_PATH):
+            logger.info(f"Loading model from {MODEL_PATH}")
+            model = YOLO(MODEL_PATH)
         else:
-            # Load local model
-            model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
-            model.load_state_dict(torch.load(model_path))
+            logger.info("Downloading YOLOv8n model...")
+            model = YOLO('yolov8n')
+            # Save model for future use
+            model.save(MODEL_PATH)
         
         model.to(device)
-        model.eval()
+        logger.info(f"Model loaded successfully on {device}")
+        return model
+        
     except Exception as e:
-        print(f"Error loading YOLO model: {e}")
+        logger.error(f"Error loading model: {str(e)}", exc_info=True)
         return None
 
 def detect_yolo(frame):
@@ -38,18 +48,27 @@ def detect_yolo(frame):
         if model is None:
             model = load_model()
             if model is None:
-                return [{"time": timestamp, "event": "YOLO model not available"}]
+                logger.error("YOLO model not loaded")
+                return []
 
-        results = model(frame)
-        for detection in results.xyxy[0]:
-            if len(detection) >= 6:
-                label = results.names[int(detection[5])]
-                if label == "cell phone":
-                    logs.append({"time": timestamp, "event": "Phone detected"})
-                elif label == "person" and len(results.xyxy[0]) > 1:
-                    logs.append({"time": timestamp, "event": "Background person detected"})
+        # Process frame
+        results = model.predict(frame, conf=0.4)[0]
+        
+        if results.boxes:
+            for box in results.boxes:
+                cls = int(box.cls[0])
+                conf = float(box.conf[0])
+                name = model.names[cls]
+                
+                logger.info(f"Detection: {name} ({conf:.2f})")
+                
+                if conf > 0.4:
+                    if name == "cell phone":
+                        logs.append({"time": timestamp, "event": "Phone detected"})
+                    elif name == "person" and len(results.boxes) > 1:
+                        logs.append({"time": timestamp, "event": "Background person detected"})
+                    
     except Exception as e:
-        print(f"YOLO detection error: {e}")
-        logs.append({"time": timestamp, "event": "YOLO detection failed"})
-
+        logger.error(f"YOLO detection error: {str(e)}")
+        
     return logs
